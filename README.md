@@ -2,7 +2,7 @@
 
 短剧平台的会员套餐、积分超市与支付弹窗交互原型，使用单文件 HTML、CSS 和 JavaScript 实现。
 
-[查看当前展示页面](https://taihang-pricing-membership.cy894590383.chatgpt.site/membership/#plans)
+[会员套餐](https://cy894590383-hash.github.io/taihang-solo-plans/#plans) · [积分超市](https://cy894590383-hash.github.io/taihang-solo-plans/#shop)
 
 ## 使用方式
 
@@ -29,3 +29,9 @@
 `index.html` 包含全部页面结构、样式与交互代码。
 
 本仓库收录会员与积分超市页面，上传于 2026-09-14。
+
+## 网页发布
+
+GitHub Pages 从 `main` 分支根目录发布。更新 `index.html` 并推送到 `main` 后，网页会自动更新；`.nojekyll` 保证页面按静态文件发布。
+
+[GitHub Pages 发布说明](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
