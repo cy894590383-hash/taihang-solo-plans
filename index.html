@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>短剧会员与积分超市</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Barlow:wght@600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --paper:#0C0F10; --surface:#191F21; --surface-2:#252D30; --line:#30383B; --line-2:#485356;
+  --ink:#F3F6F5; --ink-2:#B7C1C2; --ink-3:#929FA1;
+  --rec:#00e5d1; --rec-soft:rgba(0,229,209,.07);
+  --save:#00e5d1; --save-soft:rgba(0,229,209,.12);
+  --slate:#0D302D; --on-slate:#F0FFFB; --on-slate-2:#A2C5BE; --slate-line:#285650; --slate-2:#1B4540;
+  --btn:#E9EDEE; --btn-ink:#171D1E;
+  --f-num:"Barlow","DIN Alternate","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"Azeret Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse 75% 440px at 50% 0,rgba(0,229,209,.065),transparent 80%),var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;
+  padding-inline:20px;padding-block:28px 72px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--rec);outline-offset:2px}
+
+/* 顶部切换 */
+.tabs{display:flex;width:max-content;margin:0 auto;gap:4px;background:#262C2E;border:1px solid #343D3F;border-radius:999px;padding:4px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.tabs button{border:0;background:transparent;color:var(--ink-2);font-size:14px;font-weight:500;padding:6px 20px;border-radius:999px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:#F2F6F5;color:#162321;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+
+.ph{text-align:center;padding-block:22px 22px;display:grid;gap:4px}
+.ph h1{font-size:clamp(28px,4vw,38px);font-weight:900;letter-spacing:.04em;line-height:1.2}
+.ph p{font-size:14px;color:var(--ink-2)}
+
+/* 会员卡片：subgrid 让每一块横向对齐 */
+.plans{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding-top:36px}
+.plan{display:grid;grid-row:span 8;grid-template-rows:subgrid;row-gap:0;background:linear-gradient(160deg,#242B2E 0%,#191F22 40%,#111719 100%);border:1px solid var(--line);
+  border-radius:14px;padding:0 18px 20px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.035)}
+@supports not (grid-template-rows:subgrid){.plan{display:flex;flex-direction:column}}
+.plan > *{padding-top:14px}
+.p-head{padding-top:20px}
+.p-name{font-size:22px;font-weight:700;letter-spacing:.02em;line-height:1.2}
+.p-price{display:grid;gap:2px}
+.p-price .pr{display:flex;align-items:baseline;gap:2px}
+.p-price .cur{font-family:var(--f-num);font-size:24px;font-weight:700;margin-right:2px}
+.p-price .amt{font-family:var(--f-num);font-size:46px;font-weight:700;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.p-price .per{font-size:15px;color:var(--ink-2);margin-left:2px}
+.p-price .terms{font-size:12px;color:var(--ink-3)}
+.p-box{display:grid}
+.box-in{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.045);border-radius:12px;padding:12px 14px;display:grid;gap:6px}
+.box-in .row1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+.box-in .cr{font-family:var(--f-num);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bonus{font-size:12px;font-weight:700;color:var(--save);background:var(--save-soft);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.box-in .row1 .bonus{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;font-size:11px;padding:1px 6px}
+.bonus-icon{width:1em;height:1.2em;flex:none;fill:currentColor}
+.box-in .meta{display:block;font-size:12px;line-height:1.65;color:var(--ink-2)}
+.box-in .meta i{display:inline-block;width:1px;height:11px;margin:0 6px;vertical-align:-1px;background:var(--line-2)}
+.box-in .meta-tail{display:inline;white-space:nowrap}
+.tip{display:inline-block;margin-left:4px;vertical-align:baseline;color:var(--ink-3);cursor:help;font-size:13px;line-height:1;position:relative}
+.tip-box,.tip-popup{background:#E9F4F1;color:#132A26;font-size:12px;line-height:1.5;white-space:normal;padding:7px 10px;border-radius:8px;text-align:left}
+.tip-box{display:none}
+.tip-popup{position:fixed;left:0;top:0;width:max-content;max-width:min(230px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;overflow-wrap:anywhere;z-index:1000}
+.cta{display:block;width:100%;border:1px solid var(--btn);border-radius:10px;padding:11px 10px;background:var(--btn);color:var(--btn-ink);font-weight:700;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:background .16s,border-color .16s,box-shadow .16s,filter .16s}
+.cta:hover{filter:brightness(1.06);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.p-cta{display:grid;gap:6px;align-content:start}
+.renew{font-size:11.5px;color:var(--ink-3);text-align:center}
+.cta:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.cta.ghost{background:rgba(0,0,0,.1);color:var(--rec);border-color:rgba(0,229,209,.65);box-shadow:none}
+.cta.ghost:hover{background:rgba(0,229,209,.08);border-color:var(--rec);filter:none}
+
+.p-promo{display:grid}
+.p-block{display:grid;align-content:start}
+.promo{background:rgba(255,255,255,.04);border-radius:12px;padding:12px 14px;display:grid;gap:5px;align-content:start}
+.promo-h{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--rec);margin-bottom:2px}
+.promo-i{display:flex;align-items:baseline;gap:0 6px;font-size:13px;color:var(--ink);line-height:1.5}
+.promo-i::before{content:"✦";font-size:11px;color:var(--ink-3)}
+.promo-i span{color:var(--ink-2);margin-left:auto;padding-left:8px;white-space:nowrap}
+.promo-i b{font-family:var(--f-mono);font-weight:600;color:var(--rec)}
+.promo-i.off{color:var(--ink-3)}
+.promo-i.off s{text-decoration-thickness:1px}
+.sub-h{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;margin-bottom:4px}
+.sub-h svg{color:#89ABA6}
+.sub-h::after{content:"";flex:1;height:1px;background:var(--line);margin-left:4px}
+.ck{display:flex;gap:8px;font-size:13px;line-height:1.5;padding:3px 0;color:#C3CCCD}
+.ck::before{--check-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20d%3D%22M2.5%2010.5%207.5%2015.2%2017.5%205%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");content:"";width:14px;height:14px;margin-top:3px;color:#809894;background:currentColor;flex:none;-webkit-mask:var(--check-icon) center/contain no-repeat;mask:var(--check-icon) center/contain no-repeat}
+.ck b{font-family:var(--f-mono);font-weight:600;margin-left:auto;white-space:nowrap}
+
+/* 豪华档：青绿色层次 */
+.plan.feat{background:linear-gradient(160deg,#15524B 0%,#0B302B 42%,#0B1C18 100%);border-color:rgba(0,229,209,.52);color:var(--on-slate);box-shadow:0 12px 32px rgba(0,0,0,.16),inset 0 1px 0 rgba(0,229,209,.12)}
+.plan.feat .p-price .per,.plan.feat .p-price .terms,.plan.feat .box-in .meta,.plan.feat .tip{color:var(--on-slate-2)}
+.plan.feat .box-in{background:rgba(182,255,230,.07);border-color:rgba(182,255,230,.06)}
+.plan.feat .box-in .meta i{background:var(--slate-line)}
+.plan.feat .tip-box{background:var(--on-slate);color:var(--slate)}
+.plan.feat .renew{color:var(--on-slate-2)}
+.plan.feat .cta{background:linear-gradient(105deg,#00e5d1,#A6F7BE);border-color:var(--rec);color:#07302A}
+.plan.feat .bonus{background:rgba(0,229,209,.13);color:var(--rec)}
+.plan.feat .promo{background:rgba(159,247,220,.055)}
+.plan.feat .promo-i,.plan.feat .ck{color:#C9E2DB}
+.plan.feat .promo-i span,.plan.feat .sub-h svg,.plan.feat .ck::before,.plan.feat .promo-i::before{color:var(--on-slate-2)}
+.plan.feat .sub-h::after{background:var(--slate-line)}
+
+/* 尊享档：以香槟金作为辅助色 */
+.plan[aria-label="尊享会员"]{background:none;border-color:transparent;border-radius:14px;overflow:visible;isolation:isolate;box-shadow:none;
+  --ink-2:#C2BBAA;--ink-3:#A59D8D;--line:#443E2B;--line-2:#635841;--save:#E6C68C;--save-soft:rgba(223,188,126,.12)}
+.plan[aria-label="尊享会员"]::before{content:"";position:absolute;inset:-1px;z-index:-1;border:1px solid #665333;border-radius:inherit;background:linear-gradient(160deg,#3D3523 0%,#272316 42%,#19180F 100%);box-shadow:0 12px 28px rgba(0,0,0,.14),inset 0 1px 0 rgba(229,199,142,.09);pointer-events:none}
+.p-ribbon{position:absolute;top:-34px;left:-1px;right:-1px;height:48px;z-index:-2;display:flex;align-items:center;justify-content:center;padding:0 10px 14px;border:1px solid #CCAA6D;border-bottom:0;border-radius:14px 14px 0 0;background:linear-gradient(90deg,#FFE1AA,#E9AF63);color:#2B2111;font-size:13px;font-weight:700;line-height:1;white-space:nowrap}
+.plan[aria-label="尊享会员"] .box-in,.plan[aria-label="尊享会员"] .promo{background:rgba(237,210,154,.055)}
+.plan[aria-label="尊享会员"] .box-in{border-color:rgba(237,210,154,.05)}
+.plan[aria-label="尊享会员"] .cta{background:linear-gradient(90deg,#FFE1AA,#E9AF63);border-color:#CCAA6D;color:#2B2111}
+.plan[aria-label="尊享会员"] .promo-h,.plan[aria-label="尊享会员"] .promo-i b{color:#E6C68C}
+.plan[aria-label="尊享会员"] .ck{color:#CCC5B5}
+.plan[aria-label="尊享会员"] .ck::before,.plan[aria-label="尊享会员"] .sub-h svg{color:#B09C73}
+
+/* 积分包 */
+.packs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pack{background:linear-gradient(145deg,#23292B,#131819 85%);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;display:grid;gap:4px;align-content:start;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.pack.feat{background:linear-gradient(140deg,#173C38,#102321 62%,#101B1B);border-color:var(--rec);box-shadow:inset 0 1px 0 rgba(0,229,209,.08),0 8px 24px rgba(0,0,0,.12)}
+.pk-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pk-top h3{font-size:15px;font-weight:700}
+.pk-top .plain{font-size:12px;color:var(--ink-3)}
+.pk-cr{display:flex;align-items:baseline;gap:6px;font-family:var(--f-num);font-size:32px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;margin-top:6px}
+.spark{font-size:18px;color:var(--rec)}
+.pk-sub{font-size:12px;color:var(--ink-3)}
+.pk-price{display:flex;align-items:baseline;gap:8px;margin-top:14px}
+.pk-price b{font-family:var(--f-num);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.pk-price span{font-size:12px;color:var(--save);font-weight:700}
+.pack .cta{margin-top:8px;padding:9px 10px;font-size:14px}
+.pack .cta:not(.ghost){background:var(--rec);border-color:var(--rec);color:#06322B}
+.pk-note{font-size:12px;color:var(--ink-3);text-align:center}
+.slider{display:flex;align-items:center;gap:12px;margin-top:10px}
+.slider input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:18px;padding:0;border:0;background:transparent;accent-color:var(--rec);cursor:pointer}
+.slider input[type=range]::-webkit-slider-runnable-track{height:4px;border:0;border-radius:999px;background:linear-gradient(to right,var(--rec) 0%,var(--rec) var(--range-progress,0%),#555859 var(--range-progress,0%),#555859 100%);box-shadow:none}
+.slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-5px;border:0;border-radius:50%;background:#FFF;box-shadow:none}
+.slider input[type=range]::-moz-range-track{height:4px;border:0;border-radius:999px;background:#555859;box-shadow:none}
+.slider input[type=range]::-moz-range-progress{height:4px;border:0;border-radius:999px;background:var(--rec)}
+.slider input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#FFF;box-shadow:none}
+.slider input[type=range]:focus-visible{outline:none}
+.slider input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--rec);outline-offset:3px}
+.slider input[type=range]:focus-visible::-moz-range-thumb{outline:2px solid var(--rec);outline-offset:3px}
+.num{display:flex;flex-shrink:0;align-items:center;gap:2px;border:1px solid transparent;border-radius:8px;padding:2px 6px;background:#2B2E2F;font-family:var(--f-num);font-weight:700;color:var(--ink-3)}
+.num span{font-family:var(--f-body);font-size:12px;font-weight:400}
+.num input{-moz-appearance:textfield;appearance:textfield;width:3.25em;border:0;background:transparent;color:var(--ink);font-family:var(--f-num);font-size:16px;font-weight:700;padding:4px 2px;font-variant-numeric:tabular-nums;text-align:center}
+.num input::-webkit-inner-spin-button,.num input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.num input:focus{outline:none}
+.num:focus-within{border-color:rgba(0,229,209,.6);box-shadow:none}
+.range-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)}
+.c-foot{display:grid;gap:8px;margin-top:8px}
+.c-foot .cta{margin-top:0}
+
+/* 常见问题 */
+.faq{max-width:760px;margin:52px auto 0}
+.faq h2{text-align:center;font-size:24px;font-weight:700;margin-bottom:14px}
+details{border-bottom:1px solid var(--line);padding:14px 4px}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;font-size:15px;font-weight:500}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:8px;height:8px;border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);transform:rotate(45deg);margin-top:6px;transition:transform .15s}
+details[open] summary::after{transform:rotate(-135deg);margin-top:10px}
+summary:hover,details[open] summary{color:var(--rec)}
+details p{font-size:14px;color:var(--ink-2);margin-top:8px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#203A35;color:#EEFFF9;box-shadow:0 0 0 1px rgba(0,229,209,.25),0 8px 28px rgba(0,0,0,.35);padding:10px 16px;border-radius:10px;font-size:14px;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+
+/* 支付弹窗：订阅与积分单次购买共用外观，分别展示订单信息。 */
+.checkout{width:880px;max-width:calc(100vw - 40px);max-height:calc(100dvh - 48px);padding:0;border:1px solid #343D3F;border-radius:18px;background:#1C2224;color:var(--ink);overflow:auto;overscroll-behavior:contain;box-shadow:0 32px 100px rgba(0,0,0,.55)}
+.checkout [hidden]{display:none!important}
+.checkout::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.checkout-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.checkout-close{position:absolute;right:16px;top:16px;width:32px;height:32px;padding:7px;display:grid;place-items:center;background:transparent;color:#ADB7B8;border:0;border-radius:50%;z-index:1}
+.checkout-close:hover{background:rgba(255,255,255,.08);color:#FFF}
+.checkout-close svg{width:18px;height:18px}
+.checkout-header{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;padding:21px 28px;border-bottom:1px solid rgba(255,255,255,.07)}
+.checkout-header h2{font-size:18px;font-weight:700;line-height:1.4}
+.checkout-header p{font-size:14px;color:var(--ink-2)}
+.checkout-content{padding:20px 28px 22px}
+.checkout-label{font-size:14px;line-height:1.5;color:var(--ink-2);font-weight:400;margin-bottom:8px}
+.checkout-product{position:relative;max-width:270px;padding:12px 16px;border:1px solid rgba(0,229,209,.65);border-radius:12px;background:linear-gradient(120deg,rgba(0,229,209,.09),rgba(0,229,209,.025))}
+.checkout-product-name{font-size:14px;font-weight:500;color:#C8E4DF}
+.checkout-product-price{display:flex;gap:3px;align-items:baseline;margin-top:3px;line-height:1.15}
+.checkout-currency{font-family:var(--f-num);font-size:23px;font-weight:600}
+.checkout-product-price strong{font-family:var(--f-num);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.checkout-product-price small{font-size:14px;color:var(--ink-2);margin-left:2px}
+.checkout-product-note{font-size:12px;color:#97B7B0;margin-top:5px}
+.checkout-selected{position:absolute;right:13px;top:14px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--rec);color:#07332E}
+.checkout-selected svg{width:12px;height:12px}
+.checkout-divider{border:0;border-top:1px solid rgba(255,255,255,.07);margin:17px 0 15px}
+.checkout-breakdown{margin:0;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.045);font-size:14px;line-height:1.5}
+.checkout-line{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:4px 0}
+.checkout-line dt{color:var(--ink-3);flex-shrink:0}
+.checkout-line dd{margin:0;text-align:right;color:var(--ink);overflow-wrap:anywhere}
+.checkout-line.gift dd{color:var(--rec)}
+.checkout-line.amount{border-top:1px solid rgba(255,255,255,.07);padding-top:12px;margin-top:10px}
+.checkout-money{font-family:var(--f-num);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.checkout-line.total{padding-top:5px;align-items:center}
+.checkout-line.total dt{color:var(--ink-2)}
+.checkout-line.total dd{color:var(--rec);font-family:var(--f-num);font-size:30px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums}
+.checkout-terms{padding:14px 0 0;border:0}
+.checkout-terms h3{font-size:12px;font-weight:400;color:var(--ink-3)}
+.checkout-terms p{font-size:12px;color:var(--ink-3);line-height:1.75;margin-top:8px}
+.checkout-payment{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:68px 24px 28px;background:#282F31;text-align:center}
+.checkout-pay-method{display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:500;color:#DFE7E5;margin-bottom:18px}
+.checkout-alipay{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:14px;line-height:1;background:#1677FF;color:white;font-family:var(--f-body);font-weight:700}
+.checkout-qr{width:176px;height:176px;position:relative;border-radius:10px;padding:12px;background:white;color:#10191A;box-shadow:0 3px 12px rgba(0,0,0,.12)}
+.checkout-qr > svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
+.checkout-demo-tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:5px 8px;background:white;color:#263A36;border:1px solid #DDE7E5;border-radius:5px;font-size:12px;font-weight:500;white-space:nowrap;box-shadow:0 0 0 5px white}
+.checkout-countdown{font-size:12px;color:var(--ink-3);margin-top:12px}
+.checkout-countdown time{font-family:var(--f-mono);color:#C2CDCA;font-size:12px;font-variant-numeric:tabular-nums}
+.checkout-demo-note{font-size:12px;color:#99A8A6;margin-top:7px}
+.checkout-expired:not([hidden]){position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:inherit;background:rgba(244,250,247,.96);font-size:14px}
+.checkout-refresh{border:0;border-radius:7px;padding:7px 14px;background:#0D5B52;color:white;font-size:13px;font-weight:500}
+.checkout-refresh:hover{background:#0A7063}
+.checkout-consent{font-size:12px;color:var(--ink-3);margin-top:32px;line-height:1.8}
+.checkout-agreement{color:#CEDBD7}
+@media (max-width:700px){
+  .checkout{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);border-radius:16px}
+  .checkout-layout{grid-template-columns:minmax(0,1fr)}
+  .checkout-header{padding:22px 52px 16px 22px}
+  .checkout-content{padding:18px 22px 20px}
+  .checkout-product{max-width:none}
+  .checkout-payment{padding:24px 22px}
+  .checkout-consent{margin-top:18px}
+  .checkout-line{gap:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+@media (min-width:981px) and (max-width:1100px){
+  .box-in{padding-inline:10px}
+  .box-in .row1{gap:4px}
+  .box-in .cr{font-size:16px}
+  .box-in .row1 .bonus{font-size:9px;padding-inline:4px}
+}
+@media (max-width:980px){
+  .plans{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .plans .plan:nth-child(n+3){margin-top:36px}
+  .packs{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:620px){
+  body{padding-inline:16px}
+  .plans,.packs{grid-template-columns:1fr}
+  .plans .plan:nth-child(n+3){margin-top:0}
+  .plans .plan[aria-label="尊享会员"]{margin-top:36px}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="tabs" role="tablist" aria-label="购买类型">
+  <button type="button" role="tab" id="tab-plans" aria-controls="panel-plans" aria-selected="true">创作会员</button>
+  <button type="button" role="tab" id="tab-shop" aria-controls="panel-shop" aria-selected="false">积分超市</button>
+</div>
+
+<section class="panel" id="panel-plans" role="tabpanel" aria-labelledby="tab-plans">
+  <header class="ph"><h1>创作会员</h1><p>全模型可用 · 限时折扣进行中</p></header>
+  <div class="plans">
+    <article class="plan" aria-label="基础会员">
+      <div class="p-head"><h3 class="p-name">基础</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">99</span><span class="per">/月</span></div><p class="terms">¥1 = 10.8 积分</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">1,070 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+8.1%</span></div>
+        <p class="meta"><span>最多生成约 428 张图片</span><i></i><span class="meta-tail">411 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通基础会员">立即开通</button><p class="renew">到期自动续费 ¥99/月，可随时取消</p></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>95折</b></span></p>
+          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>96折</b></span></p>
+          <p class="promo-i off"><s>Seedance 2.5 含参</s></p>
+          <p class="promo-i off"><s>Seedance 2.5 无参</s></p>
+          <p class="promo-i off"><s>HappyHorse 1.1</s></p>
+          <p class="promo-i off"><s>Seedream 5.0 Pro</s></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
+        <p class="ck">Seedance 2.5 / 2.0 全系列（含 Fast、Mini）</p>
+        <p class="ck">HappyHorse 1.1、Wan 2.7</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>图片模型</p>
+        <p class="ck">Seedream 5.0 Pro / 5.0</p>
+        <p class="ck">Wan 2.7、Qwen Image 2.0</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/><path d="M12 21 8.5 9 12 3l3.5 6z"/></svg>会员权益</p>
+        <p class="ck">同时生成任务 <b>10 个</b></p>
+        <p class="ck">生成结果保存 <b>90 天</b></p>
+        <p class="ck">云存储空间 <b>20GB</b></p>
+        <p class="ck">会员专享积分包</p>
+      </div>
+    </article>
+    <article class="plan" aria-label="高级会员">
+      <div class="p-head"><h3 class="p-name">高级</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">699</span><span class="per">/月</span></div><p class="terms">¥1 = 11.1 积分</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">7,750 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+10.9%</span></div>
+        <p class="meta"><span>最多生成约 3,100 张图片</span><i></i><span class="meta-tail">2,980 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通高级会员">立即开通</button><p class="renew">到期自动续费 ¥699/月，可随时取消</p></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>90折</b></span></p>
+          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>94折</b></span></p>
+          <p class="promo-i">Seedance 2.5 含参<span>限时 <b>96折</b></span></p>
+          <p class="promo-i">Seedance 2.5 无参<span>限时 <b>96折</b></span></p>
+          <p class="promo-i">HappyHorse 1.1<span>限时 <b>96折</b></span></p>
+          <p class="promo-i off"><s>Seedream 5.0 Pro</s></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
+        <p class="ck">Seedance 2.5 / 2.0 全系列（含 Fast、Mini）</p>
+        <p class="ck">HappyHorse 1.1、Wan 2.7</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>图片模型</p>
+        <p class="ck">Seedream 5.0 Pro / 5.0</p>
+        <p class="ck">Wan 2.7、Qwen Image 2.0</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/><path d="M12 21 8.5 9 12 3l3.5 6z"/></svg>会员权益</p>
+        <p class="ck">同时生成任务 <b>15 个</b></p>
+        <p class="ck">生成结果保存 <b>180 天</b></p>
+        <p class="ck">云存储空间 <b>100GB</b></p>
+        <p class="ck">会员专享积分包</p>
+      </div>
+    </article>
+    <article class="plan feat" aria-label="豪华会员">
+      <div class="p-head"><h3 class="p-name">豪华</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">1,299</span><span class="per">/月</span></div><p class="terms">¥1 = 11.3 积分</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">14,700 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+13.2%</span></div>
+        <p class="meta"><span>最多生成约 5,880 张图片</span><i></i><span class="meta-tail">5,653 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通豪华会员">立即开通</button><p class="renew">到期自动续费 ¥1,299/月，可随时取消</p></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>88折</b></span></p>
+          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>93折</b></span></p>
+          <p class="promo-i">Seedance 2.5 含参<span>限时 <b>94折</b></span></p>
+          <p class="promo-i">Seedance 2.5 无参<span>限时 <b>94折</b></span></p>
+          <p class="promo-i">HappyHorse 1.1<span>限时 <b>94折</b></span></p>
+          <p class="promo-i">Seedream 5.0 Pro<span>限时 <b>98折</b></span></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
+        <p class="ck">Seedance 2.5 / 2.0 全系列（含 Fast、Mini）</p>
+        <p class="ck">HappyHorse 1.1、Wan 2.7</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>图片模型</p>
+        <p class="ck">Seedream 5.0 Pro / 5.0</p>
+        <p class="ck">Wan 2.7、Qwen Image 2.0</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/><path d="M12 21 8.5 9 12 3l3.5 6z"/></svg>会员权益</p>
+        <p class="ck">同时生成任务 <b>20 个</b></p>
+        <p class="ck">生成结果保存 <b>270 天</b></p>
+        <p class="ck">云存储空间 <b>300GB</b></p>
+        <p class="ck">会员专享积分包</p>
+      </div>
+    </article>
+    <article class="plan" aria-label="尊享会员">
+      <div class="p-head"><span class="p-ribbon">创作顶配 · 一步到位</span><h3 class="p-name">尊享</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">2,999</span><span class="per">/月</span></div><p class="terms">¥1 = 11.5 积分</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">34,500 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+15%</span></div>
+        <p class="meta"><span>最多生成约 13,800 张图片</span><i></i><span class="meta-tail">13,269 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通尊享会员">立即开通</button><p class="renew">到期自动续费 ¥2,999/月，可随时取消</p></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>85折</b></span></p>
+          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>92折</b></span></p>
+          <p class="promo-i">Seedance 2.5 含参<span>限时 <b>93折</b></span></p>
+          <p class="promo-i">Seedance 2.5 无参<span>限时 <b>93折</b></span></p>
+          <p class="promo-i">HappyHorse 1.1<span>限时 <b>93折</b></span></p>
+          <p class="promo-i">Seedream 5.0 Pro<span>限时 <b>96折</b></span></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
+        <p class="ck">Seedance 2.5 / 2.0 全系列（含 Fast、Mini）</p>
+        <p class="ck">HappyHorse 1.1、Wan 2.7</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>图片模型</p>
+        <p class="ck">Seedream 5.0 Pro / 5.0</p>
+        <p class="ck">Wan 2.7、Qwen Image 2.0</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/><path d="M12 21 8.5 9 12 3l3.5 6z"/></svg>会员权益</p>
+        <p class="ck">同时生成任务 <b>30 个</b></p>
+        <p class="ck">生成结果保存 <b>365 天</b></p>
+        <p class="ck">云存储空间 <b>1TB</b></p>
+        <p class="ck">会员专享积分包</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="panel" id="panel-shop" role="tabpanel" aria-labelledby="tab-shop" hidden>
+  <header class="ph"><h1>积分超市</h1><p>全模型可用 · 180 天有效</p></header>
+  <div class="packs">
+      <article class="pack feat" aria-label="囤货包">
+        <div class="pk-top"><h3>囤货包</h3><span class="bonus">加赠 12%</span></div>
+        <p class="pk-cr"><span class="spark">✦</span>89,600</p>
+        <p class="pk-sub">原 80,000 + 赠 9,600</p>
+        <p class="pk-price"><b>¥8,000</b><span>立省 ¥960</span></p>
+        <button class="cta" type="button" data-credit-pack aria-label="购买囤货包">立即购买</button>
+        <p class="pk-note">会员专享</p>
+      </article>
+      <article class="pack feat" aria-label="重度包">
+        <div class="pk-top"><h3>重度包</h3><span class="bonus">加赠 10%</span></div>
+        <p class="pk-cr"><span class="spark">✦</span>33,000</p>
+        <p class="pk-sub">原 30,000 + 赠 3,000</p>
+        <p class="pk-price"><b>¥3,000</b><span>立省 ¥300</span></p>
+        <button class="cta" type="button" data-credit-pack aria-label="购买重度包">立即购买</button>
+        <p class="pk-note">会员专享</p>
+      </article>
+      <article class="pack" aria-label="高频包">
+        <div class="pk-top"><h3>高频包</h3><span class="bonus">加赠 8%</span></div>
+        <p class="pk-cr"><span class="spark">✦</span>10,800</p>
+        <p class="pk-sub">原 10,000 + 赠 800</p>
+        <p class="pk-price"><b>¥1,000</b><span>立省 ¥80</span></p>
+        <button class="cta ghost" type="button" data-credit-pack aria-label="购买高频包">立即购买</button>
+        <p class="pk-note">会员专享</p>
+      </article>
+      <article class="pack" aria-label="项目包">
+        <div class="pk-top"><h3>项目包</h3><span class="bonus">加赠 5%</span></div>
+        <p class="pk-cr"><span class="spark">✦</span>5,250</p>
+        <p class="pk-sub">原 5,000 + 赠 250</p>
+        <p class="pk-price"><b>¥500</b><span>立省 ¥25</span></p>
+        <button class="cta ghost" type="button" data-credit-pack aria-label="购买项目包">立即购买</button>
+        <p class="pk-note">会员专享</p>
+      </article>
+      <article class="pack" aria-label="日常包">
+        <div class="pk-top"><h3>日常包</h3><span class="bonus">加赠 3%</span></div>
+        <p class="pk-cr"><span class="spark">✦</span>2,060</p>
+        <p class="pk-sub">原 2,000 + 赠 60</p>
+        <p class="pk-price"><b>¥200</b><span>立省 ¥6</span></p>
+        <button class="cta ghost" type="button" data-credit-pack aria-label="购买日常包">立即购买</button>
+        <p class="pk-note">会员专享</p>
+      </article>
+      <article class="pack custom" aria-label="自定义充值">
+        <div class="pk-top"><h3>自定义充值</h3><span class="plain">全员可买</span></div>
+        <p class="pk-cr"><span class="spark">✦</span><span id="cCredits">300</span></p>
+        <div class="slider">
+          <input type="range" id="cRange" min="300" max="50000" step="10" value="300" aria-label="充值积分">
+          <label class="num" for="cAmt"><input type="number" id="cAmt" min="300" max="50000" step="10" value="300" inputmode="numeric"><span>积分</span></label>
+        </div>
+        <div class="range-ends"><span>300 积分</span><span>50,000 积分</span></div>
+        <div class="c-foot"><button class="cta" type="button" id="cBuy">¥30 购买</button><p class="pk-note" id="cNote">¥1 = 10 积分，¥30 起充</p></div>
+      </article>
+  </div>
+</section>
+
+<section class="faq" aria-labelledby="faq-h">
+  <h2 id="faq-h">常见问题</h2>
+  <div class="faq-list">
+    <details><summary>积分怎么扣？</summary><p>视频按生成秒数扣，图片按张数扣；带参考视频时，参考视频的时长也计入。先扣订阅积分，再扣积分超市积分。</p></details>
+    <details><summary>积分有效期多久？</summary><p>订阅积分 30 天有效，积分超市购买的积分 180 天有效。会员到期后剩余积分仍可使用，但不再享受限时折扣。</p></details>
+    <details><summary>会员会自动续费吗？</summary><p>会员为连续包月，每 30 天自动续费，续费前会提醒你。可以随时取消，已开通的会员用到到期日为止。</p></details>
+    <details><summary>生成失败会扣积分吗？</summary><p>点击生成时会先扣除积分。如果任务失败且没有产生模型费用，或官方退回了费用，积分会自动返还，可以在「积分明细」里看到对应的积分记录。</p></details>
+    <details><summary>可以退款吗？</summary><p>会员订阅和积分充值购买后不支持退款。</p></details>
+    <details><summary>积分不够用怎么办？</summary><p>可以升级会员档位（补差价即可），或在积分超市购买积分包、自定义充值。</p></details>
+  </div>
+</section>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<dialog class="checkout" id="subscriptionCheckout" aria-labelledby="checkoutTitle" aria-describedby="checkoutPlanName">
+  <button class="checkout-close" id="checkoutClose" type="button" aria-label="关闭支付弹窗" autofocus><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19"/></svg></button>
+  <div class="checkout-layout">
+    <section class="checkout-order" id="checkoutOrder" aria-label="订阅订单">
+      <header class="checkout-header"><h2 id="checkoutTitle">开通创作会员</h2><p id="checkoutPlanName"></p></header>
+      <div class="checkout-content">
+        <h3 class="checkout-label">商品信息</h3>
+        <div class="checkout-product">
+          <span class="checkout-selected" aria-label="已选择"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg></span>
+          <p class="checkout-product-name" id="checkoutProductName">连续包月</p>
+          <p class="checkout-product-price"><span class="checkout-currency">¥</span><strong id="checkoutPrice"></strong><small id="checkoutPeriod">/月</small></p>
+          <p class="checkout-product-note" id="checkoutProductNote">每 30 天自动续费，可随时取消</p>
+        </div>
+        <hr class="checkout-divider">
+        <h3 class="checkout-label">订单明细</h3>
+        <dl class="checkout-breakdown">
+          <div class="checkout-line" id="checkoutBaseRow" hidden><dt>原积分</dt><dd id="checkoutBaseCredits"></dd></div>
+          <div class="checkout-line gift" id="checkoutGiftRow" hidden><dt>加赠积分</dt><dd id="checkoutGiftCredits"></dd></div>
+          <div class="checkout-line"><dt id="checkoutCreditsLabel">积分数量</dt><dd id="checkoutCredits"></dd></div>
+          <div class="checkout-line"><dt id="checkoutInfoLabel">续费信息</dt><dd id="checkoutRenewal"></dd></div>
+          <div class="checkout-line amount"><dt id="checkoutSubtotalLabel">套餐金额</dt><dd class="checkout-money" id="checkoutSubtotal"></dd></div>
+          <div class="checkout-line total"><dt>应付金额</dt><dd id="checkoutTotal"></dd></div>
+        </dl>
+        <section class="checkout-terms" aria-labelledby="checkoutTermsTitle"><h3 id="checkoutTermsTitle">订阅与续费说明</h3><p id="checkoutTermsText">会员为连续包月，每 30 天自动续费，续费前会提醒你。可以随时取消，取消后会员可用至到期日。订阅积分 30 天有效，会员订阅购买后不支持退款。</p></section>
+      </div>
+    </section>
+    <aside class="checkout-payment" aria-label="支付宝扫码支付">
+      <p class="checkout-pay-method"><span class="checkout-alipay" aria-hidden="true">支</span>请用支付宝扫码支付</p>
+      <div class="checkout-qr" role="group" aria-label="演示二维码，不能用于付款">
+        <svg id="checkoutDemoQr" viewBox="0 0 37 37" aria-hidden="true" focusable="false"></svg>
+        <span class="checkout-demo-tag">示意二维码</span>
+        <div class="checkout-expired" id="checkoutExpired" hidden><span>二维码已失效</span><button class="checkout-refresh" id="checkoutRefresh" type="button">刷新二维码</button></div>
+      </div>
+      <p class="checkout-countdown" id="checkoutCountdown"><time id="checkoutTime">15:00</time> 后二维码失效</p>
+      <p class="checkout-demo-note">当前为页面演示，不会实际扣款</p>
+      <p class="checkout-consent"><span id="checkoutConsentLead">开通即代表同意</span><br><span class="checkout-agreement">《太行SOLO会员协议》</span></p>
+    </aside>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+  // 气泡挂在页面根部，避开卡片裁切与独立层叠上下文。
+  const tipPopup=document.createElement('div');
+  tipPopup.className='tip-popup'; tipPopup.id='model-reference-tooltip';
+  tipPopup.setAttribute('role','tooltip'); tipPopup.hidden=true;
+  document.body.appendChild(tipPopup);
+  let activeTip=null, tipHideTimer;
+  function hideTip(){
+    clearTimeout(tipHideTimer);
+    if(activeTip)activeTip.removeAttribute('aria-describedby');
+    activeTip=null; tipPopup.hidden=true;
+  }
+  function placeTip(){
+    if(!activeTip||tipPopup.hidden)return;
+    const rect=activeTip.getBoundingClientRect();
+    const vw=document.documentElement.clientWidth, vh=window.innerHeight;
+    if(rect.bottom<=0||rect.top>=vh||rect.right<=0||rect.left>=vw){hideTip();return;}
+    const box=tipPopup.getBoundingClientRect(), edge=12, gap=8;
+    const left=Math.max(edge,Math.min(rect.right-box.width+8,vw-box.width-edge));
+    let top=rect.top-box.height-gap;
+    if(top<edge)top=rect.bottom+gap;
+    top=Math.max(edge,Math.min(top,vh-box.height-edge));
+    tipPopup.style.left=left+'px'; tipPopup.style.top=top+'px';
+  }
+  function showTip(trigger){
+    clearTimeout(tipHideTimer);
+    const source=trigger.querySelector('.tip-box');
+    if(!source)return;
+    if(activeTip&&activeTip!==trigger)activeTip.removeAttribute('aria-describedby');
+    activeTip=trigger;
+    tipPopup.textContent=source.textContent;
+    const colors=getComputedStyle(source);
+    tipPopup.style.backgroundColor=colors.backgroundColor;
+    tipPopup.style.color=colors.color;
+    trigger.setAttribute('aria-describedby',tipPopup.id);
+    tipPopup.hidden=false; placeTip();
+  }
+  function deferHideTip(){
+    clearTimeout(tipHideTimer);
+    tipHideTimer=setTimeout(()=>{
+      if(activeTip&&document.activeElement!==activeTip&&!activeTip.matches(':hover')&&!tipPopup.matches(':hover'))hideTip();
+    },120);
+  }
+  $$('.tip').forEach(trigger=>{
+    trigger.addEventListener('mouseenter',()=>showTip(trigger));
+    trigger.addEventListener('mouseleave',deferHideTip);
+    trigger.addEventListener('focus',()=>showTip(trigger));
+    trigger.addEventListener('blur',deferHideTip);
+  });
+  tipPopup.addEventListener('mouseenter',()=>clearTimeout(tipHideTimer));
+  tipPopup.addEventListener('mouseleave',deferHideTip);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hideTip();});
+  document.addEventListener('pointerdown',e=>{
+    if(activeTip&&!activeTip.contains(e.target)&&!tipPopup.contains(e.target))hideTip();
+  });
+  window.addEventListener('resize',placeTip);
+  window.addEventListener('scroll',placeTip,true);
+  const toast=$('#toast');
+
+  // 从所点卡片读取价格和积分，单次购买不套用订阅周期与续费文案。
+  const checkout=$('#subscriptionCheckout');
+  const checkoutExpired=$('#checkoutExpired');
+  const checkoutCountdown=$('#checkoutCountdown'), checkoutTime=$('#checkoutTime');
+  const subscriptionTerms=$('#checkoutTermsText').textContent;
+  let checkoutOpener=null, checkoutTimer=null, checkoutExpiresAt=0;
+  let previousOverflow='', previousPaddingRight='', backdropPress=false;
+  const money=n=>'¥'+n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  function updateCheckoutTimer(){
+    const seconds=Math.max(0,Math.ceil((checkoutExpiresAt-Date.now())/1000));
+    checkoutTime.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+    checkoutExpired.hidden=seconds>0;
+    checkoutCountdown.hidden=seconds===0;
+    if(seconds===0){clearInterval(checkoutTimer);checkoutTimer=null;}
+  }
+  function refreshCheckoutQr(){
+    clearInterval(checkoutTimer);
+    checkoutExpiresAt=Date.now()+15*60*1000;
+    updateCheckoutTimer();
+    checkoutTimer=setInterval(updateCheckoutTimer,1000);
+  }
+  // 仅用于演示扫码区域的几何图形，不包含支付地址或订单数据。
+  function drawDemoQr(){
+    const modules=[];
+    for(let y=2;y<35;y++)for(let x=2;x<35;x++){
+      const finder=(x<10&&y<10)||(x>26&&y<10)||(x<10&&y>26);
+      if(!finder&&(x*13+y*7+x*y*3)%17<8)modules.push('M'+x+' '+y+'h1v1h-1z');
+    }
+    [[2,2],[28,2],[2,28]].forEach(([x,y])=>{
+      for(let dy=0;dy<7;dy++)for(let dx=0;dx<7;dx++){
+        if(dx===0||dx===6||dy===0||dy===6||(dx>=2&&dx<=4&&dy>=2&&dy<=4))modules.push('M'+(x+dx)+' '+(y+dy)+'h1v1h-1z');
+      }
+    });
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',modules.join(''));path.setAttribute('fill','currentColor');
+    $('#checkoutDemoQr').appendChild(path);
+  }
+  function showCheckout(trigger,order){
+    if(checkout.open)return;
+    const subscription=order.kind==='subscription', pack=order.kind==='pack';
+    const points=n=>n.toLocaleString('zh-CN')+' 积分';
+    checkout.dataset.kind=order.kind;
+    $('#checkoutTitle').textContent=subscription?'开通创作会员':pack?'购买积分包':'自定义充值';
+    $('#checkoutOrder').setAttribute('aria-label',subscription?'订阅订单':'积分购买订单');
+    $('#checkoutPlanName').textContent=subscription?order.name+'会员 · 连续包月':order.name+' · '+(pack?'会员专享':'全员可买');
+    $('#checkoutProductName').textContent=subscription?'连续包月':'一次性支付';
+    $('#checkoutPrice').textContent=order.price.toLocaleString('zh-CN');
+    $('#checkoutPeriod').hidden=!subscription;
+    $('#checkoutProductNote').textContent=subscription?'每 30 天自动续费，可随时取消':points(order.credits)+' · 180 天有效';
+    $('#checkoutBaseRow').hidden=!pack;
+    $('#checkoutGiftRow').hidden=!pack;
+    $('#checkoutBaseCredits').textContent=pack?points(order.base):'';
+    $('#checkoutGiftCredits').textContent=pack?points(order.gift):'';
+    $('#checkoutCreditsLabel').textContent=subscription?'积分数量':'到账积分';
+    $('#checkoutCredits').textContent=points(order.credits)+(subscription?'/月':'');
+    $('#checkoutInfoLabel').textContent=subscription?'续费信息':'积分有效期';
+    $('#checkoutRenewal').textContent=subscription?'每 30 天 ¥'+order.price.toLocaleString('zh-CN')+'，可随时取消':'180 天';
+    $('#checkoutSubtotalLabel').textContent=subscription?'套餐金额':'购买金额';
+    $('#checkoutSubtotal').textContent=money(order.price);
+    $('#checkoutTotal').textContent=money(order.price);
+    $('#checkoutTermsTitle').textContent=subscription?'订阅与续费说明':'积分购买说明';
+    $('#checkoutTermsText').textContent=subscription?subscriptionTerms:
+      '本次为一次性购买，积分 180 天有效，购买后不支持退款。'+(pack?'有效期内的积分在会员到期后仍可使用，但不再享受会员限时折扣。':'自定义充值按 ¥1 = 10 积分计算，不含加赠积分。');
+    $('#checkoutConsentLead').textContent=subscription?'开通即代表同意':'支付即代表同意';
+    hideTip();toast.classList.remove('show');
+    checkoutOpener=trigger;
+    previousOverflow=document.body.style.overflow;
+    previousPaddingRight=document.body.style.paddingRight;
+    const scrollbarGap=window.innerWidth-document.documentElement.clientWidth;
+    if(scrollbarGap>0)document.body.style.paddingRight=(parseFloat(getComputedStyle(document.body).paddingRight)+scrollbarGap)+'px';
+    document.body.style.overflow='hidden';
+    checkout.showModal();checkout.scrollTop=0;
+    refreshCheckoutQr();
+  }
+  function openCheckout(trigger){
+    const card=trigger.closest('.plan');
+    showCheckout(trigger,{
+      kind:'subscription',name:card.querySelector('.p-name').textContent.trim(),
+      price:Number(card.querySelector('.amt').textContent.replace(/,/g,'')),
+      credits:Number(card.querySelector('.cr').textContent.replace(/[^\d]/g,''))
+    });
+  }
+  function openCreditPack(trigger){
+    const card=trigger.closest('.pack');
+    const parts=card.querySelector('.pk-sub').textContent.match(/[\d,]+/g).map(n=>Number(n.replace(/,/g,'')));
+    showCheckout(trigger,{
+      kind:'pack',name:card.querySelector('.pk-top h3').textContent.trim(),
+      price:Number(card.querySelector('.pk-price b').textContent.replace(/[^\d]/g,'')),
+      base:parts[0],gift:parts[1],credits:Number(card.querySelector('.pk-cr').textContent.replace(/[^\d]/g,''))
+    });
+  }
+  function closeCheckout(){if(checkout.open)checkout.close();}
+  checkout.addEventListener('close',()=>{
+    clearInterval(checkoutTimer);checkoutTimer=null;
+    document.body.style.overflow=previousOverflow;
+    document.body.style.paddingRight=previousPaddingRight;
+    if(checkoutOpener&&checkoutOpener.isConnected)checkoutOpener.focus({preventScroll:true});
+    checkoutOpener=null;
+  });
+  checkout.addEventListener('cancel',e=>{e.preventDefault();closeCheckout();});
+  checkout.addEventListener('pointerdown',e=>{
+    const rect=checkout.getBoundingClientRect();
+    backdropPress=e.target===checkout&&(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom);
+  });
+  checkout.addEventListener('click',e=>{if(backdropPress&&e.target===checkout)closeCheckout();backdropPress=false;});
+  $('#checkoutClose').addEventListener('click',closeCheckout);
+  $('#checkoutRefresh').addEventListener('click',()=>{refreshCheckoutQr();$('#checkoutClose').focus();});
+  document.addEventListener('visibilitychange',()=>{if(checkout.open)updateCheckoutTimer();});
+  $$('[data-subscribe]').forEach(trigger=>trigger.addEventListener('click',()=>openCheckout(trigger)));
+  $$('[data-credit-pack]').forEach(trigger=>trigger.addEventListener('click',()=>openCreditPack(trigger)));
+  drawDemoQr();
+  const tabs=$$('[role="tab"]');
+  function show(id){
+    hideTip();
+    tabs.forEach(b=>{const on=b.id===id;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).hidden=!on;});
+  }
+  tabs.forEach(b=>b.addEventListener('click',()=>{show(b.id);history.replaceState(null,'',b.id==='tab-shop'?'#shop':'#plans');}));
+  if(location.hash==='#shop')show('tab-shop');
+  const r=$('#cRange'), a=$('#cAmt'), c=$('#cCredits'), buy=$('#cBuy'), note=$('#cNote');
+  function render(n){
+    r.value=n; a.value=n;
+    r.style.setProperty('--range-progress',((Number(r.value)-Number(r.min))/(Number(r.max)-Number(r.min))*100)+'%');
+    c.textContent=n.toLocaleString('zh-CN');
+    buy.textContent='¥'+(n/10).toLocaleString('zh-CN')+' 购买';
+    note.textContent=n>=2000?'会员买积分包，多送 3%~12%':'¥1 = 10 积分，¥30 起充';
+  }
+  function commit(){
+    let n=Math.round((Number(a.value)||0)/10)*10;
+    n=Math.min(50000,Math.max(300,n));
+    render(n);
+  }
+  r.addEventListener('input',()=>render(Number(r.value)));
+  a.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit();}});
+  a.addEventListener('blur',commit);
+  buy.addEventListener('click',()=>{
+    commit();
+    const credits=Number(a.value);
+    showCheckout(buy,{kind:'custom',name:'自定义充值',credits,price:credits/10});
+  });
+  render(300);
+})();
+</script>
+</body>
+</html>
