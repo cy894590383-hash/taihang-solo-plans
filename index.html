@@ -669,7 +669,6 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
         <dl class="checkout-breakdown">
           <div class="checkout-line" id="checkoutBaseRow" hidden><dt>原积分</dt><dd id="checkoutBaseCredits"></dd></div>
           <div class="checkout-line gift" id="checkoutGiftRow" hidden><dt>加赠积分</dt><dd id="checkoutGiftCredits"></dd></div>
-          <div class="checkout-line"><dt>到账账号</dt><dd id="checkoutAccount">个人账号</dd></div>
           <div class="checkout-line"><dt id="checkoutCreditsLabel">积分数量</dt><dd id="checkoutCredits"></dd></div>
           <div class="checkout-line"><dt id="checkoutInfoLabel">续费信息</dt><dd id="checkoutRenewal"></dd></div>
           <div class="checkout-line amount"><dt id="checkoutSubtotalLabel">套餐金额</dt><dd class="checkout-money" id="checkoutSubtotal"></dd></div>
@@ -815,7 +814,6 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     $('#checkoutGiftRow').hidden=!pack;
     $('#checkoutBaseCredits').textContent=pack?points(order.base):'';
     $('#checkoutGiftCredits').textContent=pack?points(order.gift):'';
-    $('#checkoutAccount').textContent=window.__role==='owner'?'林一的团队':'个人账号';
     $('#checkoutCreditsLabel').textContent=subscription?'积分数量':'到账积分';
     $('#checkoutCredits').textContent=points(order.credits)+(subscription?'/月':'');
     $('#checkoutInfoLabel').textContent=subscription?'续费信息':'积分有效期';
