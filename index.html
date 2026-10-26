@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>短剧会员与积分超市</title>
+<title>短剧会员订阅</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Barlow:wght@600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
@@ -21,6 +21,7 @@
   --f-mono:"Azeret Mono",ui-monospace,Menlo,monospace;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:radial-gradient(ellipse 75% 440px at 50% 0,rgba(0,229,209,.065),transparent 80%),var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;
   padding-inline:20px;padding-block:28px 72px;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1120px;margin:0 auto}
@@ -29,6 +30,17 @@ p{margin:0}
 button{font:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--rec);outline-offset:2px}
 
+/* 顶部：中间切换个人/团队，右上角积分超市等入口 */
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.topbar .tabs{grid-column:2}
+.back{grid-column:1;justify-self:start;display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;color:var(--ink-2);font-size:14px;padding:6px 4px}
+.back:hover{color:var(--ink)}
+.acts{grid-column:3;justify-self:end;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.act{display:inline-flex;align-items:center;gap:6px;border:1px solid #343D3F;background:#1E2426;color:var(--ink-2);font-size:13px;padding:5px 12px;border-radius:999px;white-space:nowrap}
+.act:hover{color:var(--ink);border-color:var(--line-2)}
+.act[aria-pressed="true"]{color:var(--rec);border-color:rgba(0,229,209,.55);background:rgba(0,229,209,.06)}
+.act .dot{display:grid;place-items:center;width:15px;height:15px;border-radius:50%;background:var(--ink);color:#162321;font-size:9px;line-height:1}
+.act[aria-pressed="true"] .dot{background:var(--rec)}
 /* 顶部切换 */
 .tabs{display:flex;width:max-content;margin:0 auto;gap:4px;background:#262C2E;border:1px solid #343D3F;border-radius:999px;padding:4px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
 .tabs button{border:0;background:transparent;color:var(--ink-2);font-size:14px;font-weight:500;padding:6px 20px;border-radius:999px}
@@ -45,6 +57,9 @@ button{font:inherit;cursor:pointer}
   border-radius:14px;padding:0 18px 20px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.035)}
 @supports not (grid-template-rows:subgrid){.plan{display:flex;flex-direction:column}}
 .plan > *{padding-top:14px}
+.plans.team .plan{grid-row:span 7}
+.hot{font-family:var(--f-num);font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--rec);background:rgba(0,229,209,.12);border-radius:4px;padding:0 5px;margin-left:2px;align-self:center}
+.plan.gold .hot{color:#E6C68C;background:rgba(223,188,126,.14)}
 .p-head{padding-top:20px}
 .p-name{font-size:22px;font-weight:700;letter-spacing:.02em;line-height:1.2}
 .p-price{display:grid;gap:2px}
@@ -107,16 +122,16 @@ button{font:inherit;cursor:pointer}
 .plan.feat .sub-h::after{background:var(--slate-line)}
 
 /* 尊享档：以香槟金作为辅助色 */
-.plan[aria-label="尊享会员"]{background:none;border-color:transparent;border-radius:14px;overflow:visible;isolation:isolate;box-shadow:none;
+.plan.gold{background:none;border-color:transparent;border-radius:14px;overflow:visible;isolation:isolate;box-shadow:none;
   --ink-2:#C2BBAA;--ink-3:#A59D8D;--line:#443E2B;--line-2:#635841;--save:#E6C68C;--save-soft:rgba(223,188,126,.12)}
-.plan[aria-label="尊享会员"]::before{content:"";position:absolute;inset:-1px;z-index:-1;border:1px solid #665333;border-radius:inherit;background:linear-gradient(160deg,#3D3523 0%,#272316 42%,#19180F 100%);box-shadow:0 12px 28px rgba(0,0,0,.14),inset 0 1px 0 rgba(229,199,142,.09);pointer-events:none}
+.plan.gold::before{content:"";position:absolute;inset:-1px;z-index:-1;border:1px solid #665333;border-radius:inherit;background:linear-gradient(160deg,#3D3523 0%,#272316 42%,#19180F 100%);box-shadow:0 12px 28px rgba(0,0,0,.14),inset 0 1px 0 rgba(229,199,142,.09);pointer-events:none}
 .p-ribbon{position:absolute;top:-34px;left:-1px;right:-1px;height:48px;z-index:-2;display:flex;align-items:center;justify-content:center;padding:0 10px 14px;border:1px solid #CCAA6D;border-bottom:0;border-radius:14px 14px 0 0;background:linear-gradient(90deg,#FFE1AA,#E9AF63);color:#2B2111;font-size:13px;font-weight:700;line-height:1;white-space:nowrap}
-.plan[aria-label="尊享会员"] .box-in,.plan[aria-label="尊享会员"] .promo{background:rgba(237,210,154,.055)}
-.plan[aria-label="尊享会员"] .box-in{border-color:rgba(237,210,154,.05)}
-.plan[aria-label="尊享会员"] .cta{background:linear-gradient(90deg,#FFE1AA,#E9AF63);border-color:#CCAA6D;color:#2B2111}
-.plan[aria-label="尊享会员"] .promo-h,.plan[aria-label="尊享会员"] .promo-i b{color:#E6C68C}
-.plan[aria-label="尊享会员"] .ck{color:#CCC5B5}
-.plan[aria-label="尊享会员"] .ck::before,.plan[aria-label="尊享会员"] .sub-h svg{color:#B09C73}
+.plan.gold .box-in,.plan.gold .promo{background:rgba(237,210,154,.055)}
+.plan.gold .box-in{border-color:rgba(237,210,154,.05)}
+.plan.gold .cta{background:linear-gradient(90deg,#FFE1AA,#E9AF63);border-color:#CCAA6D;color:#2B2111}
+.plan.gold .promo-h,.plan.gold .promo-i b{color:#E6C68C}
+.plan.gold .ck{color:#CCC5B5}
+.plan.gold .ck::before,.plan.gold .sub-h svg{color:#B09C73}
 
 /* 积分包 */
 .packs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -229,6 +244,25 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
   .checkout-consent{margin-top:18px}
   .checkout-line{gap:12px}
 }
+/* 演示：身份切换 */
+.demo-role{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:16px;z-index:50;display:flex;align-items:center;gap:8px;background:#1E2426;border:1px dashed #4A5558;border-radius:10px;padding:6px 10px;font-size:12px;color:var(--ink-3);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.demo-role select{background:#2A3133;color:var(--ink);border:1px solid #3A4447;border-radius:6px;padding:3px 6px;font:inherit;font-size:12px}
+.space{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;font-size:13px;color:var(--ink-2);padding:5px 6px;white-space:nowrap}
+.space:hover b{color:var(--rec)}
+.space .caret{font-size:10px;color:var(--ink-3)}
+.space b{color:var(--ink);font-weight:500}
+.space .badge{font-size:11px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:0 5px}
+/* 联系商务弹窗 */
+.contact{width:290px;max-width:calc(100vw - 32px);padding:0;border:1px solid #2E3133;border-radius:20px;background:#161718;color:var(--ink);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.55)}
+.contact::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.contact-head{position:relative;padding:26px 44px 0;text-align:center}
+.contact-head h2{font-size:17px;font-weight:700;line-height:1.4}
+.contact-close{position:absolute;right:14px;top:22px;width:28px;height:28px;padding:5px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:#C9CDCF}
+.contact-close:hover{background:rgba(255,255,255,.08);color:#FFF}
+.contact-close svg{width:16px;height:16px}
+.contact-qr{width:178px;height:178px;margin:18px auto 24px;padding:14px;border-radius:10px;background:#FFF;color:#000}
+.contact-qr svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
+.contact-foot{padding:14px 16px;background:#222426;color:#8F9496;font-size:13px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 @media (min-width:981px) and (max-width:1100px){
@@ -242,11 +276,17 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
   .plans .plan:nth-child(n+3){margin-top:36px}
   .packs{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+@media (max-width:760px){
+  .topbar{grid-template-columns:1fr}
+  .topbar .tabs{grid-column:1;grid-row:2}
+  .acts{grid-column:1;grid-row:1}
+  .back{grid-row:2}
+}
 @media (max-width:620px){
   body{padding-inline:16px}
   .plans,.packs{grid-template-columns:1fr}
   .plans .plan:nth-child(n+3){margin-top:0}
-  .plans .plan[aria-label="尊享会员"]{margin-top:36px}
+  .plans .plan.gold{margin-top:36px}
 }
 
 </style>
@@ -254,30 +294,34 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
 <body>
 <div class="wrap">
 
-<div class="tabs" role="tablist" aria-label="购买类型">
-  <button type="button" role="tab" id="tab-plans" aria-controls="panel-plans" aria-selected="true">创作会员</button>
-  <button type="button" role="tab" id="tab-shop" aria-controls="panel-shop" aria-selected="false">积分超市</button>
+<div class="topbar">
+  <button type="button" class="back" id="backToPlans" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"/></svg>返回会员订阅</button>
+  <div class="tabs" role="tablist" aria-label="订阅类型">
+    <button type="button" role="tab" id="tab-personal" aria-controls="panel-personal" aria-selected="true">个人订阅</button>
+    <button type="button" role="tab" id="tab-team" aria-controls="panel-team" aria-selected="false">团队订阅</button>
+  </div>
+  <nav class="acts" aria-label="积分与订单">
+    <button type="button" class="act" id="openShop" aria-pressed="false"><span class="dot" aria-hidden="true">✦</span>积分超市</button>
+    <button type="button" class="act" data-demo="积分明细">积分明细</button>
+    <button type="button" class="act" data-demo="我的订单">我的订单</button>
+  </nav>
 </div>
 
-<section class="panel" id="panel-plans" role="tabpanel" aria-labelledby="tab-plans">
-  <header class="ph"><h1>创作会员</h1><p>全模型可用 · 限时折扣进行中</p></header>
+<section class="panel" id="panel-personal" role="tabpanel" aria-labelledby="tab-personal">
+  <header class="ph"><h1>个人订阅</h1><p>全模型可用 · 限时折扣进行中</p></header>
   <div class="plans">
     <article class="plan" aria-label="基础会员">
       <div class="p-head"><h3 class="p-name">基础</h3></div>
-      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">99</span><span class="per">/月</span></div><p class="terms">¥1 = 10.8 积分</p></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">99</span><span class="per">/月</span></div><p class="terms">1 积分 ≈ ¥0.093</p></div>
       <div class="p-box"><div class="box-in">
         <div class="row1"><span class="cr">1,070 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+8.1%</span></div>
-        <p class="meta"><span>最多生成约 428 张图片</span><i></i><span class="meta-tail">411 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+        <p class="meta"><span>最多生成约 428 张图片</span><i></i><span class="meta-tail">17 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
       </div></div>
-      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通基础会员">立即开通</button><p class="renew">到期自动续费 ¥99/月，可随时取消</p></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通基础会员">立即开通</button></div>
       <div class="p-promo"><div class="promo">
           <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
-          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>95折</b></span></p>
-          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>96折</b></span></p>
-          <p class="promo-i off"><s>Seedance 2.5 含参</s></p>
-          <p class="promo-i off"><s>Seedance 2.5 无参</s></p>
-          <p class="promo-i off"><s>HappyHorse 1.1</s></p>
-          <p class="promo-i off"><s>Seedream 5.0 Pro</s></p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
       </div></div>
       <div class="p-block">
         <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
@@ -299,20 +343,16 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     </article>
     <article class="plan" aria-label="高级会员">
       <div class="p-head"><h3 class="p-name">高级</h3></div>
-      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">699</span><span class="per">/月</span></div><p class="terms">¥1 = 11.1 积分</p></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">699</span><span class="per">/月</span></div><p class="terms">1 积分 ≈ ¥0.090</p></div>
       <div class="p-box"><div class="box-in">
         <div class="row1"><span class="cr">7,750 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+10.9%</span></div>
-        <p class="meta"><span>最多生成约 3,100 张图片</span><i></i><span class="meta-tail">2,980 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+        <p class="meta"><span>最多生成约 3,100 张图片</span><i></i><span class="meta-tail">124 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
       </div></div>
-      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通高级会员">立即开通</button><p class="renew">到期自动续费 ¥699/月，可随时取消</p></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通高级会员">立即开通</button></div>
       <div class="p-promo"><div class="promo">
           <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
-          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>90折</b></span></p>
-          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>94折</b></span></p>
-          <p class="promo-i">Seedance 2.5 含参<span>限时 <b>96折</b></span></p>
-          <p class="promo-i">Seedance 2.5 无参<span>限时 <b>96折</b></span></p>
-          <p class="promo-i">HappyHorse 1.1<span>限时 <b>96折</b></span></p>
-          <p class="promo-i off"><s>Seedream 5.0 Pro</s></p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
       </div></div>
       <div class="p-block">
         <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
@@ -334,20 +374,16 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     </article>
     <article class="plan feat" aria-label="豪华会员">
       <div class="p-head"><h3 class="p-name">豪华</h3></div>
-      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">1,299</span><span class="per">/月</span></div><p class="terms">¥1 = 11.3 积分</p></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">1,299</span><span class="per">/月</span></div><p class="terms">1 积分 ≈ ¥0.088</p></div>
       <div class="p-box"><div class="box-in">
         <div class="row1"><span class="cr">14,700 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+13.2%</span></div>
-        <p class="meta"><span>最多生成约 5,880 张图片</span><i></i><span class="meta-tail">5,653 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+        <p class="meta"><span>最多生成约 5,880 张图片</span><i></i><span class="meta-tail">235 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
       </div></div>
-      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通豪华会员">立即开通</button><p class="renew">到期自动续费 ¥1,299/月，可随时取消</p></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通豪华会员">立即开通</button></div>
       <div class="p-promo"><div class="promo">
           <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
-          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>88折</b></span></p>
-          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>93折</b></span></p>
-          <p class="promo-i">Seedance 2.5 含参<span>限时 <b>94折</b></span></p>
-          <p class="promo-i">Seedance 2.5 无参<span>限时 <b>94折</b></span></p>
-          <p class="promo-i">HappyHorse 1.1<span>限时 <b>94折</b></span></p>
-          <p class="promo-i">Seedream 5.0 Pro<span>限时 <b>98折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
       </div></div>
       <div class="p-block">
         <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
@@ -367,22 +403,18 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
         <p class="ck">会员专享积分包</p>
       </div>
     </article>
-    <article class="plan" aria-label="尊享会员">
+    <article class="plan gold" aria-label="尊享会员">
       <div class="p-head"><span class="p-ribbon">创作顶配 · 一步到位</span><h3 class="p-name">尊享</h3></div>
-      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">2,999</span><span class="per">/月</span></div><p class="terms">¥1 = 11.5 积分</p></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">2,999</span><span class="per">/月</span></div><p class="terms">1 积分 ≈ ¥0.087</p></div>
       <div class="p-box"><div class="box-in">
         <div class="row1"><span class="cr">34,500 积分/月</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+15%</span></div>
-        <p class="meta"><span>最多生成约 13,800 张图片</span><i></i><span class="meta-tail">13,269 秒视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（视频 1 秒）、Wan 2.7 / Qwen Image 2.0（图像 1 张）</span></span></span></p>
+        <p class="meta"><span>最多生成约 13,800 张图片</span><i></i><span class="meta-tail">552 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
       </div></div>
-      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通尊享会员">立即开通</button><p class="renew">到期自动续费 ¥2,999/月，可随时取消</p></div>
+      <div class="p-cta"><button class="cta" type="button" data-subscribe aria-label="开通尊享会员">立即开通</button></div>
       <div class="p-promo"><div class="promo">
           <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
-          <p class="promo-i">Seedance 2.0 含参<span>限时 <b>85折</b></span></p>
-          <p class="promo-i">Seedance 2.0 无参<span>限时 <b>92折</b></span></p>
-          <p class="promo-i">Seedance 2.5 含参<span>限时 <b>93折</b></span></p>
-          <p class="promo-i">Seedance 2.5 无参<span>限时 <b>93折</b></span></p>
-          <p class="promo-i">HappyHorse 1.1<span>限时 <b>93折</b></span></p>
-          <p class="promo-i">Seedream 5.0 Pro<span>限时 <b>96折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
       </div></div>
       <div class="p-block">
         <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 3l4 3 4-3"/><path d="M10.5 10v5l4-2.5z"/></svg>视频模型</p>
@@ -405,7 +437,133 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
   </div>
 </section>
 
-<section class="panel" id="panel-shop" role="tabpanel" aria-labelledby="tab-shop" hidden>
+<section class="panel" id="panel-team" role="tabpanel" aria-labelledby="tab-team" hidden>
+  <header class="ph"><h1>团队订阅</h1><p>全模型可用 · 套餐绑定团队，成员共享全部权益</p></header>
+  <div class="plans team">
+    <article class="plan " aria-label="团队基础">
+      <div class="p-head"><h3 class="p-name">基础</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">19,999</span></div><p class="terms">1 积分 ≈ ¥0.083</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">240,000 积分</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+20%</span></div>
+        <p class="meta"><span>最多生成约 9.6 万张图片</span><i></i><span class="meta-tail">3,846 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-contact aria-label="联系专属商务购买团队基础">联系专属商务</button></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.6-4.8-4-5.6"/></svg>团队管理</p>
+        <p class="ck">团队席位管理</p>
+        <p class="ck">团队资产共享</p>
+        <p class="ck">积分分配</p>
+        <p class="ck">项目权限管理</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>生产效率</p>
+        <p class="ck">无限并发<span class="hot">HOT</span></p>
+        <p class="ck">全模型可用</p>
+        <p class="ck">积分有效期 <b>180 天</b></p>
+        <p class="ck">云端存储空间 <b>10 TB</b></p>
+        <p class="ck">生成结果保存 <b>365 天</b></p>
+        <p class="ck">专属商务对接</p>
+      </div>
+    </article>
+    <article class="plan " aria-label="团队高级">
+      <div class="p-head"><h3 class="p-name">高级</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">29,999</span></div><p class="terms">1 积分 ≈ ¥0.081</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">372,000 积分</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+24%</span></div>
+        <p class="meta"><span>最多生成约 14.9 万张图片</span><i></i><span class="meta-tail">5,961 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-contact aria-label="联系专属商务购买团队高级">联系专属商务</button></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.6-4.8-4-5.6"/></svg>团队管理</p>
+        <p class="ck">团队席位管理</p>
+        <p class="ck">团队资产共享</p>
+        <p class="ck">积分分配</p>
+        <p class="ck">项目权限管理</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>生产效率</p>
+        <p class="ck">无限并发<span class="hot">HOT</span></p>
+        <p class="ck">全模型可用</p>
+        <p class="ck">积分有效期 <b>180 天</b></p>
+        <p class="ck">云端存储空间 <b>50 TB</b></p>
+        <p class="ck">生成结果保存 <b>365 天</b></p>
+        <p class="ck">专属商务对接</p>
+      </div>
+    </article>
+    <article class="plan feat" aria-label="团队豪华">
+      <div class="p-head"><h3 class="p-name">豪华</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">49,999</span></div><p class="terms">1 积分 ≈ ¥0.078</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">640,000 积分</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+28%</span></div>
+        <p class="meta"><span>最多生成约 25.6 万张图片</span><i></i><span class="meta-tail">10,256 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-contact aria-label="联系专属商务购买团队豪华">联系专属商务</button></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.6-4.8-4-5.6"/></svg>团队管理</p>
+        <p class="ck">团队席位管理</p>
+        <p class="ck">团队资产共享</p>
+        <p class="ck">积分分配</p>
+        <p class="ck">项目权限管理</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>生产效率</p>
+        <p class="ck">无限并发<span class="hot">HOT</span></p>
+        <p class="ck">全模型可用</p>
+        <p class="ck">积分有效期 <b>180 天</b></p>
+        <p class="ck">云端存储空间 <b>130 TB</b></p>
+        <p class="ck">生成结果保存 <b>365 天</b></p>
+        <p class="ck">专属商务对接</p>
+      </div>
+    </article>
+    <article class="plan gold" aria-label="团队尊享">
+      <div class="p-head"><span class="p-ribbon">量产首选 · 单价最低</span><h3 class="p-name">尊享</h3></div>
+      <div class="p-price"><div class="pr"><span class="cur">¥</span><span class="amt">99,999</span></div><p class="terms">1 积分 ≈ ¥0.076</p></div>
+      <div class="p-box"><div class="box-in">
+        <div class="row1"><span class="cr">1,320,000 积分</span><span class="bonus"><svg class="bonus-icon" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M9 .75 15.5 7.5h-3.7C11.4 13.2 7.8 17.5 1.5 19.2 5.1 15.6 6.4 11.9 6.2 7.5H2.5L9 .75Z"/></svg>+32%</span></div>
+        <p class="meta"><span>最多生成约 52.8 万张图片</span><i></i><span class="meta-tail">21,153 分钟视频<span class="tip" tabindex="0" aria-label="参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0">ⓘ<span class="tip-box" role="tooltip">参考模型：Seedance 2.0 Mini 480P 无参（按会员限时折扣价）、Wan 2.7 / Qwen Image 2.0</span></span></span></p>
+      </div></div>
+      <div class="p-cta"><button class="cta" type="button" data-contact aria-label="联系专属商务购买团队尊享">联系专属商务</button></div>
+      <div class="p-promo"><div class="promo">
+          <p class="promo-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>限时折扣</p>
+          <p class="promo-i">Seedance 2.0 Fast<span>限时 <b>7折</b></span></p>
+          <p class="promo-i">Seedance 2.0 Mini<span>限时 <b>4折</b></span></p>
+      </div></div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20c0-2.6-1.6-4.8-4-5.6"/></svg>团队管理</p>
+        <p class="ck">团队席位管理</p>
+        <p class="ck">团队资产共享</p>
+        <p class="ck">积分分配</p>
+        <p class="ck">项目权限管理</p>
+      </div>
+      <div class="p-block">
+        <p class="sub-h"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>生产效率</p>
+        <p class="ck">无限并发<span class="hot">HOT</span></p>
+        <p class="ck">全模型可用</p>
+        <p class="ck">积分有效期 <b>180 天</b></p>
+        <p class="ck">云端存储空间 <b>300 TB</b></p>
+        <p class="ck">生成结果保存 <b>365 天</b></p>
+        <p class="ck">专属商务对接</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="panel" id="panel-shop" aria-label="积分超市" hidden>
   <header class="ph"><h1>积分超市</h1><p>全模型可用 · 180 天有效</p></header>
   <div class="packs">
       <article class="pack feat" aria-label="囤货包">
@@ -463,17 +621,33 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
 
 <section class="faq" aria-labelledby="faq-h">
   <h2 id="faq-h">常见问题</h2>
-  <div class="faq-list">
+  <div class="faq-list" id="faq-personal">
     <details><summary>积分怎么扣？</summary><p>视频按生成秒数扣，图片按张数扣；带参考视频时，参考视频的时长也计入。先扣订阅积分，再扣积分超市积分。</p></details>
-    <details><summary>积分有效期多久？</summary><p>订阅积分 30 天有效，积分超市购买的积分 180 天有效。会员到期后剩余积分仍可使用，但不再享受限时折扣。</p></details>
+    <details><summary>积分有效期多久？</summary><p>订阅积分 30 天有效，会员到期后作废；积分超市购买的积分 180 天有效，会员到期后仍可使用，但不再享受限时折扣。</p></details>
     <details><summary>会员会自动续费吗？</summary><p>会员为连续包月，每 30 天自动续费，续费前会提醒你。可以随时取消，已开通的会员用到到期日为止。</p></details>
     <details><summary>生成失败会扣积分吗？</summary><p>点击生成时会先扣除积分。如果任务失败且没有产生模型费用，或官方退回了费用，积分会自动返还，可以在「积分明细」里看到对应的积分记录。</p></details>
     <details><summary>可以退款吗？</summary><p>会员订阅和积分充值购买后不支持退款。</p></details>
     <details><summary>积分不够用怎么办？</summary><p>可以升级会员档位（补差价即可），或在积分超市购买积分包、自定义充值。</p></details>
   </div>
+  <div class="faq-list" id="faq-team" hidden>
+    <details><summary>怎么购买团队套餐？</summary><p>点击「联系专属商务」添加企业微信，签约并对公付款后，由后台为团队充值，可开发票。</p></details>
+    <details><summary>团队成员怎么使用？</summary><p>套餐绑定在团队上，管理员可以把积分分配给成员。团队成员享受团队套餐的全部权益和限时折扣。</p></details>
+    <details><summary>积分怎么扣？</summary><p>视频按生成秒数扣，图片按张数扣；带参考视频时，参考视频的时长也计入。</p></details>
+    <details><summary>积分有效期多久？</summary><p>团队积分 180 天有效，每次购买为一个独立的积分批次。</p></details>
+    <details><summary>生成失败会扣积分吗？</summary><p>点击生成时会先扣除积分。如果任务失败且没有产生模型费用，或官方退回了费用，积分会自动返还，可以在「积分明细」里看到对应的积分记录。</p></details>
+    <details><summary>积分不够用怎么办？</summary><p>团队套餐可以重复购买，联系专属商务再次购买任意档位即可。</p></details>
+  </div>
 </section>
 
 </div>
+
+<label class="demo-role">演示身份
+  <select id="demoRole">
+    <option value="personal">个人空间</option>
+    <option value="owner">团队空间 · 主账号</option>
+    <option value="member">团队空间 · 成员</option>
+  </select>
+</label>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -495,6 +669,7 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
         <dl class="checkout-breakdown">
           <div class="checkout-line" id="checkoutBaseRow" hidden><dt>原积分</dt><dd id="checkoutBaseCredits"></dd></div>
           <div class="checkout-line gift" id="checkoutGiftRow" hidden><dt>加赠积分</dt><dd id="checkoutGiftCredits"></dd></div>
+          <div class="checkout-line"><dt>到账账号</dt><dd id="checkoutAccount">个人账号</dd></div>
           <div class="checkout-line"><dt id="checkoutCreditsLabel">积分数量</dt><dd id="checkoutCredits"></dd></div>
           <div class="checkout-line"><dt id="checkoutInfoLabel">续费信息</dt><dd id="checkoutRenewal"></dd></div>
           <div class="checkout-line amount"><dt id="checkoutSubtotalLabel">套餐金额</dt><dd class="checkout-money" id="checkoutSubtotal"></dd></div>
@@ -515,6 +690,15 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
       <p class="checkout-consent"><span id="checkoutConsentLead">开通即代表同意</span><br><span class="checkout-agreement">《太行SOLO会员协议》</span></p>
     </aside>
   </div>
+</dialog>
+
+<dialog class="contact" id="contactDialog" aria-labelledby="contactTitle">
+  <div class="contact-head">
+    <h2 id="contactTitle">扫码添加专属销售微信</h2>
+    <button type="button" class="contact-close" id="contactClose" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="contact-qr"><svg id="contactQr" viewBox="0 0 37 37" aria-hidden="true" focusable="false"></svg></div>
+  <p class="contact-foot">获取更多专属服务</p>
 </dialog>
 
 <script>
@@ -600,7 +784,7 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     checkoutTimer=setInterval(updateCheckoutTimer,1000);
   }
   // 仅用于演示扫码区域的几何图形，不包含支付地址或订单数据。
-  function drawDemoQr(){
+  function drawDemoQr(svg){
     const modules=[];
     for(let y=2;y<35;y++)for(let x=2;x<35;x++){
       const finder=(x<10&&y<10)||(x>26&&y<10)||(x<10&&y>26);
@@ -613,7 +797,7 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     });
     const path=document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('d',modules.join(''));path.setAttribute('fill','currentColor');
-    $('#checkoutDemoQr').appendChild(path);
+    (svg||$('#checkoutDemoQr')).appendChild(path);
   }
   function showCheckout(trigger,order){
     if(checkout.open)return;
@@ -631,6 +815,7 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     $('#checkoutGiftRow').hidden=!pack;
     $('#checkoutBaseCredits').textContent=pack?points(order.base):'';
     $('#checkoutGiftCredits').textContent=pack?points(order.gift):'';
+    $('#checkoutAccount').textContent=window.__role==='owner'?'林一的团队':'个人账号';
     $('#checkoutCreditsLabel').textContent=subscription?'积分数量':'到账积分';
     $('#checkoutCredits').textContent=points(order.credits)+(subscription?'/月':'');
     $('#checkoutInfoLabel').textContent=subscription?'续费信息':'积分有效期';
@@ -689,13 +874,45 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
   $$('[data-subscribe]').forEach(trigger=>trigger.addEventListener('click',()=>openCheckout(trigger)));
   $$('[data-credit-pack]').forEach(trigger=>trigger.addEventListener('click',()=>openCreditPack(trigger)));
   drawDemoQr();
-  const tabs=$$('[role="tab"]');
-  function show(id){
+  drawDemoQr($('#contactQr'));
+  // 联系商务：团队套餐线下签约，弹出商务企业微信二维码。
+  const contact=$('#contactDialog');
+  $$('[data-contact]').forEach(btn=>btn.addEventListener('click',()=>{
     hideTip();
-    tabs.forEach(b=>{const on=b.id===id;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).hidden=!on;});
+    contact.showModal();
+  }));
+  $('#contactClose').addEventListener('click',()=>contact.close());
+  contact.addEventListener('click',e=>{
+    const r=contact.getBoundingClientRect();
+    if(e.target===contact&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))contact.close();
+  });
+  $$('[data-demo]').forEach(b=>b.addEventListener('click',()=>{
+    toast.textContent=b.dataset.demo+'：演示页面暂未开放';toast.classList.add('show');
+    clearTimeout(toast._t);toast._t=setTimeout(()=>toast.classList.remove('show'),1800);
+  }));
+  // 个人/团队为页签；积分超市从右上角进入，进入后两个页签都不选中。
+  const tabs=$$('[role="tab"]'), shopBtn=$('#openShop'), back=$('#backToPlans'), tablist=$('.tabs');
+  let lastPlan='personal';
+  const views={personal:'panel-personal',team:'panel-team',shop:'panel-shop'};
+  function show(view){
+    hideTip();
+    Object.entries(views).forEach(([k,id])=>{document.getElementById(id).hidden=k!==view;});
+    tabs.forEach(b=>b.setAttribute('aria-selected',b.id==='tab-'+view));
+    // 积分超市当作独立页面：隐藏订阅切换和入口，左上角给返回。
+    const inShop=view==='shop';
+    tablist.hidden=inShop; back.hidden=!inShop;
+    $$('.acts .act').forEach(b=>b.hidden=inShop);  // 积分超市页只保留当前身份
+    if(!inShop)lastPlan=view;
+    window.scrollTo(0,0);
+    $('#faq-team').hidden=view!=='team';
+    $('#faq-personal').hidden=view==='team';
+    history.replaceState(null,'','#'+view);
   }
-  tabs.forEach(b=>b.addEventListener('click',()=>{show(b.id);history.replaceState(null,'',b.id==='tab-shop'?'#shop':'#plans');}));
-  if(location.hash==='#shop')show('tab-shop');
+  tabs.forEach(b=>b.addEventListener('click',()=>show(b.id.replace('tab-',''))));
+  shopBtn.addEventListener('click',()=>show('shop'));
+  back.addEventListener('click',()=>show(lastPlan));
+  const start=location.hash.slice(1);
+  if(views[start])show(start);
   const r=$('#cRange'), a=$('#cAmt'), c=$('#cCredits'), buy=$('#cBuy'), note=$('#cNote');
   function render(n){
     r.value=n; a.value=n;
@@ -703,6 +920,7 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     c.textContent=n.toLocaleString('zh-CN');
     buy.textContent='¥'+(n/10).toLocaleString('zh-CN')+' 购买';
     note.textContent=n>=2000?'会员买积分包，多送 3%~12%':'¥1 = 10 积分，¥30 起充';
+    if(window.__applyRole)window.__applyRole();
   }
   function commit(){
     let n=Math.round((Number(a.value)||0)/10)*10;
@@ -718,6 +936,29 @@ details p{font-size:14px;color:var(--ink-2);margin-top:8px}
     showCheckout(buy,{kind:'custom',name:'自定义充值',credits,price:credits/10});
   });
   render(300);
+
+  // 演示：不同身份的按钮状态。规则「在哪个空间买就归谁」，团队只有主账号能购买。
+  let role='personal';
+  const say=msg=>{toast.textContent=msg;toast.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>toast.classList.remove('show'),2000);};
+  const lockables=[...$$('[data-contact]'),...$$('[data-credit-pack]'),buy];
+  const personalBtns=[...$$('[data-subscribe]')];
+  [...lockables,...personalBtns].forEach(b=>b.dataset.label=b.textContent);
+  function applyRole(){
+    const member=role==='member';
+    lockables.forEach(b=>{
+      if(member){b.disabled=true;b.textContent='请联系主账号';}
+      else{b.disabled=false;if(b!==buy)b.textContent=b.dataset.label;}
+    });
+    // 团队账号不能买个人订阅：和「请联系主账号」同样置灰。
+    personalBtns.forEach(b=>{
+      const team=role!=='personal';
+      b.disabled=team; b.textContent=team?'请切换个人账号':b.dataset.label;
+    });
+    if(!member)buy.textContent='¥'+(Number(a.value)/10).toLocaleString('zh-CN')+' 购买';
+  }
+  window.__applyRole=applyRole;
+  $('#demoRole').addEventListener('change',e=>{role=e.target.value;window.__role=role;applyRole();});
+  applyRole();
 })();
 </script>
 </body>
